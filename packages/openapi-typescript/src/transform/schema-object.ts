@@ -65,7 +65,7 @@ export function transformSchemaObjectWithComposition(
   }
   // `true` returns `unknown` (this exists, but is untyped)
   if ((schemaObject as unknown) === true) {
-    return options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
+    return options.ctx.unsafeDefaultAny ? ANY : UNKNOWN;
   }
   // for any other unexpected type, throw error
   if (Array.isArray(schemaObject) || typeof schemaObject !== "object") {
@@ -291,7 +291,7 @@ export function transformSchemaObjectWithComposition(
 
   // When no final type can be generated, fall back to unknown type (or related variants)
   if (!finalType) {
-    const unknownType = options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
+    const unknownType = options.ctx.unsafeDefaultAny ? ANY : UNKNOWN;
     if ("type" in schemaObject) {
       finalType = tsRecord(STRING, options.ctx.emptyObjectsUnknown ? unknownType : NEVER);
     } else {
@@ -346,8 +346,8 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
 
     // type: array (with support for tuples)
     if (schemaObject.type === "array") {
-      // default to `unknown[]` (or `any[]` with unsafeObjectAny)
-      let itemType: ts.TypeNode = options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
+      // default to `unknown[]` (or `any[]` with unsafeDefaultAny)
+      let itemType: ts.TypeNode = options.ctx.unsafeDefaultAny ? ANY : UNKNOWN;
       // tuple type
       if (schemaObject.prefixItems || Array.isArray(schemaObject.items)) {
         const prefixItems = schemaObject.prefixItems ?? (schemaObject.items as (SchemaObject | ReferenceObject)[]);
@@ -617,7 +617,7 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
       stringIndexTypes.push(transformSchemaObject(schemaObject.additionalProperties as SchemaObject, options, true));
     }
     if (hasImplicitAdditionalProperties || (!schemaObject.additionalProperties && options.ctx.additionalProperties)) {
-      stringIndexTypes.push(options.ctx.unsafeObjectAny ? ANY : UNKNOWN);
+      stringIndexTypes.push(options.ctx.unsafeDefaultAny ? ANY : UNKNOWN);
     }
     if (hasExplicitPatternProperties) {
       for (const [_, v] of getEntries(schemaObject.patternProperties ?? {}, options.ctx)) {
