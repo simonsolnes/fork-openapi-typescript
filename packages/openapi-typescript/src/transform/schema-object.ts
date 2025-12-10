@@ -2,6 +2,7 @@ import { parseRef } from "@redocly/openapi-core/lib/ref-utils.js";
 import ts from "typescript";
 import {
   addJSDocComment,
+  ANY,
   BOOLEAN,
   NEVER,
   NULL,
@@ -64,7 +65,7 @@ export function transformSchemaObjectWithComposition(
   }
   // `true` returns `unknown` (this exists, but is untyped)
   if ((schemaObject as unknown) === true) {
-    return UNKNOWN;
+    return options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
   }
   // for any other unexpected type, throw error
   if (Array.isArray(schemaObject) || typeof schemaObject !== "object") {
@@ -290,14 +291,15 @@ export function transformSchemaObjectWithComposition(
 
   // When no final type can be generated, fall back to unknown type (or related variants)
   if (!finalType) {
+    const unknownType = options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
     if ("type" in schemaObject) {
-      finalType = tsRecord(STRING, options.ctx.emptyObjectsUnknown ? UNKNOWN : NEVER);
+      finalType = tsRecord(STRING, options.ctx.emptyObjectsUnknown ? unknownType : NEVER);
     } else {
-      finalType = UNKNOWN;
+      finalType = unknownType;
     }
   }
 
-  if (finalType !== UNKNOWN && schemaObject.nullable) {
+  if (finalType !== UNKNOWN && finalType !== ANY && schemaObject.nullable) {
     finalType = tsNullable([finalType]);
   }
 
@@ -344,8 +346,8 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
 
     // type: array (with support for tuples)
     if (schemaObject.type === "array") {
-      // default to `unknown[]`
-      let itemType: ts.TypeNode = UNKNOWN;
+      // default to `unknown[]` (or `any[]` with unsafeObjectAny)
+      let itemType: ts.TypeNode = options.ctx.unsafeObjectAny ? ANY : UNKNOWN;
       // tuple type
       if (schemaObject.prefixItems || Array.isArray(schemaObject.items)) {
         const prefixItems = schemaObject.prefixItems ?? (schemaObject.items as (SchemaObject | ReferenceObject)[]);
@@ -615,7 +617,7 @@ function transformSchemaObjectCore(schemaObject: SchemaObject, options: Transfor
       stringIndexTypes.push(transformSchemaObject(schemaObject.additionalProperties as SchemaObject, options, true));
     }
     if (hasImplicitAdditionalProperties || (!schemaObject.additionalProperties && options.ctx.additionalProperties)) {
-      stringIndexTypes.push(UNKNOWN);
+      stringIndexTypes.push(options.ctx.unsafeObjectAny ? ANY : UNKNOWN);
     }
     if (hasExplicitPatternProperties) {
       for (const [_, v] of getEntries(schemaObject.patternProperties ?? {}, options.ctx)) {

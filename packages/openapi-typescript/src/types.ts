@@ -630,6 +630,8 @@ export interface OpenAPITSOptions {
   arrayLength?: boolean;
   /** Allow schema objects with no specified properties to have additional properties if not expressly forbidden? (default: false) */
   emptyObjectsUnknown?: boolean;
+  /** Generate `any` instead of `unknown` for unspecified types (default: false) */
+  unsafeObjectAny?: boolean;
   /** Provide current working directory (cwd) which helps resolve relative remote schemas */
   cwd?: PathLike;
   /** Should schema objects with a default value not be considered optional? */
@@ -693,6 +695,7 @@ export interface GlobalContext {
     refsHandled: string[];
   };
   emptyObjectsUnknown: boolean;
+  unsafeObjectAny: boolean;
   enum: boolean;
   enumValues: boolean;
   dedupeEnums: boolean;
