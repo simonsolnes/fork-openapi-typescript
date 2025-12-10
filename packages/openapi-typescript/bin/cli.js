@@ -23,6 +23,7 @@ Options
   --immutable                Generate readonly types
   --additional-properties    Treat schema objects as if \`additionalProperties: true\` is set
   --empty-objects-unknown    Generate \`unknown\` instead of \`Record<string, never>\` for empty objects
+  --unsafe-default-any       Generate \`any\` instead of \`unknown\` for unspecified types
   --default-non-nullable     Set to \`false\` to ignore default values when generating non-nullable types
   --properties-required-by-default
                              Treat schema objects as if \`required\` is set to all properties by default
@@ -73,6 +74,7 @@ const flags = parser(args, {
     "defaultNonNullable",
     "propertiesRequiredByDefault",
     "emptyObjectsUnknown",
+    "unsafeDefaultAny",
     "enum",
     "enumValues",
     "dedupeEnums",
@@ -138,6 +140,7 @@ async function generateSchema(schema, { redocly, silent = false }) {
       propertiesRequiredByDefault: flags.propertiesRequiredByDefault,
       defaultNonNullable: flags.defaultNonNullable,
       emptyObjectsUnknown: flags.emptyObjectsUnknown,
+      unsafeDefaultAny: flags.unsafeDefaultAny,
       enum: flags.enum,
       enumValues: flags.enumValues,
       dedupeEnums: flags.dedupeEnums,

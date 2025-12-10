@@ -21,6 +21,7 @@ export const STRING = ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeywo
 export const TRUE = ts.factory.createLiteralTypeNode(ts.factory.createTrue());
 export const UNDEFINED = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
 export const UNKNOWN = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+export const ANY = ts.factory.createKeywordTypeNode(ts.SyntaxKind.AnyKeyword);
 
 const LB_RE = /\r?\n/g;
 const COMMENT_RE = /\*\//g;
